@@ -1,11 +1,20 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+// Main app component - sets up the router view
+</script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <div class="app">
+    <RouterView />
+  </div>
 </template>
 
-<style scoped></style>
+<style>
+/* Global Styles */
+@import '@/styles/main.scss';
+</style>
+
+<style scoped>
+.app {
+  min-height: 100vh;
+}
+</style>
