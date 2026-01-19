@@ -34,6 +34,20 @@
           </div>
         </div>
         <div class="template-actions">
+          <button @click="openEditor" class="btn btn-edit btn-compact">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            {{ t('templateGenerator.edit') || '编辑' }}
+          </button>
           <button @click="exportImage" class="btn btn-primary btn-compact">
             <svg
               width="18"
@@ -211,16 +225,46 @@
         </div>
       </div>
     </div>
+
+    <!-- 编辑器模态框 -->
+    <div v-if="showEditor && templateData" class="editor-modal">
+      <div class="editor-modal-content">
+        <div class="editor-modal-header">
+          <h2>编辑图纸</h2>
+          <button @click="closeEditor" class="btn-close">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <TemplateEditor
+          :pixels="editablePixels"
+          :available-colors="availableColors"
+          :cell-size="20"
+          @update:pixels="handlePixelsUpdate"
+          @save="handleSave"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { TemplateData, CanvasDrawOptions } from '@/types'
+import type { TemplateData, CanvasDrawOptions, PixelInfo } from '@/types'
 import { downloadCanvas } from '@/utils/canvas'
 import { printTemplate as printTemplateUtil } from '@/utils/export'
-import { getColorById } from '@/assets/data/beadColors'
+import { getColorById, getColorPalette } from '@/assets/data/beadColors'
+import TemplateEditor from './TemplateEditor.vue'
 
 const { t } = useI18n()
 
@@ -343,6 +387,49 @@ const printTemplate = () => {
     paperSize: 'A4',
     margin: 10,
   })
+}
+
+const showEditor = ref(false)
+const editablePixels = ref<PixelInfo[][]>([])
+
+// 获取可用颜色
+const availableColors = computed(() => {
+  if (!props.templateData) return []
+  return getColorPalette(props.templateData.brand)
+})
+
+const openEditor = () => {
+  if (!props.templateData) return
+  // 深拷贝像素数据
+  editablePixels.value = props.templateData.pixels.map((row) => row.map((pixel) => ({ ...pixel })))
+  showEditor.value = true
+}
+
+const closeEditor = () => {
+  showEditor.value = false
+}
+
+const handlePixelsUpdate = (newPixels: PixelInfo[][]) => {
+  editablePixels.value = newPixels
+}
+
+const handleSave = (newPixels: PixelInfo[][]) => {
+  if (!props.templateData) return
+
+  // 更新模板数据
+  const updatedTemplate = {
+    ...props.templateData,
+    pixels: newPixels,
+  }
+
+  // 更新父组件
+  emit('update:templateData', updatedTemplate)
+
+  // 保存到 localStorage
+  localStorage.setItem(`template_${updatedTemplate.id}`, JSON.stringify(updatedTemplate))
+
+  // 关闭编辑器
+  showEditor.value = false
 }
 
 // 监听变化重新渲染
@@ -732,6 +819,16 @@ onMounted(() => {
     padding: 0.5rem 1rem;
     font-size: 0.8rem;
   }
+
+  &.btn-edit {
+    background: #ff9800;
+    color: white;
+    border: none;
+
+    &:hover {
+      background: #f57c00;
+    }
+  }
 }
 
 @media (max-width: 640px) {
@@ -753,5 +850,59 @@ onMounted(() => {
     padding: 0.4rem 0.8rem;
     font-size: 0.75rem;
   }
+}
+
+/* 编辑器模态框样式 */
+.editor-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.editor-modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 1400px;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.editor-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.editor-modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #666;
+  transition: color 0.2s;
+}
+
+.btn-close:hover {
+  color: #333;
 }
 </style>

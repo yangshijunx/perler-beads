@@ -7,7 +7,7 @@ export default {
   nav: {
     home: 'Home',
     history: 'History',
-    backToEditor: 'Back to Editor'
+    backToEditor: 'Back to Editor',
   },
 
   // Home page
@@ -16,7 +16,7 @@ export default {
     subtitle: 'Transform your images into beautiful bead patterns',
     section1: 'Upload Image',
     section2: 'Configure Settings',
-    section3: 'Generate Template'
+    section3: 'Generate Template',
   },
 
   // Image Uploader
@@ -30,7 +30,7 @@ export default {
     zoomOut: 'Zoom Out',
     apply: 'Apply',
     cancel: 'Cancel',
-    clear: 'Clear'
+    clear: 'Clear',
   },
 
   // Size Selector
@@ -43,18 +43,18 @@ export default {
       small: 'Small',
       medium: 'Medium',
       large: 'Large',
-      xl: 'XL'
+      xl: 'XL',
     },
     sizes: {
       mini: 'Mini',
       regular: 'Regular',
       maxi: 'Maxi',
-      mega: 'Mega'
+      mega: 'Mega',
     },
     estimatedSize: 'Estimated Size',
     width: 'Width',
     height: 'Height',
-    totalBeads: 'Total Beads'
+    totalBeads: 'Total Beads',
   },
 
   // Color Palette
@@ -63,7 +63,7 @@ export default {
     colorsAvailable: '{count} colors available',
     selectedColor: 'Selected Color',
     code: 'Code',
-    brand: 'Brand'
+    brand: 'Brand',
   },
 
   // Template Generator
@@ -81,15 +81,33 @@ export default {
     resetZoom: 'Reset Zoom',
     colorLegend: 'Color Legend',
     colors: 'colors',
+    edit: 'Edit',
     exportPNG: 'Export PNG',
-    print: 'Print'
+    print: 'Print',
+  },
+
+  // Editor
+  editor: {
+    title: 'Edit Template',
+    selectColor: 'Select Color',
+    searchColor: 'Search color...',
+    tools: {
+      brush: 'Brush',
+      fill: 'Fill',
+      eyedropper: 'Eyedropper',
+    },
+    undo: 'Undo',
+    redo: 'Redo',
+    save: 'Save',
+    cancel: 'Cancel',
+    close: 'Close',
   },
 
   // Processing
   processing: {
     generate: 'Generate Template',
     generating: 'Generating...',
-    processing: 'Processing...'
+    processing: 'Processing...',
   },
 
   // Brands
@@ -97,7 +115,7 @@ export default {
     hama: 'Hama',
     perler: 'Perler',
     artkal: 'Artkal',
-    nabbi: 'Nabbi'
+    nabbi: 'Nabbi',
   },
 
   // Bead Sizes
@@ -105,7 +123,7 @@ export default {
     mini: 'Mini',
     regular: 'Regular',
     maxi: 'Maxi',
-    mega: 'Mega'
+    mega: 'Mega',
   },
 
   // History
@@ -127,7 +145,7 @@ export default {
     today: 'Today',
     yesterday: 'Yesterday',
     daysAgo: '{days} days ago',
-    weeksAgo: '{weeks} week{s} ago'
+    weeksAgo: '{weeks} week{s} ago',
   },
 
   // Settings
@@ -135,7 +153,7 @@ export default {
     advancedOptions: 'Advanced Options',
     enableDithering: 'Enable Dithering',
     language: 'Language',
-    theme: 'Theme'
+    theme: 'Theme',
   },
 
   // Errors
@@ -144,7 +162,7 @@ export default {
     failedToGenerate: 'Failed to generate template. Please try again.',
     failedToSave: 'Failed to save',
     fileNotSupported: 'File type not supported',
-    fileTooLarge: 'File too large'
+    fileTooLarge: 'File too large',
   },
 
   // Common
@@ -164,6 +182,6 @@ export default {
     done: 'Done',
     loading: 'Loading...',
     success: 'Success',
-    error: 'Error'
-  }
+    error: 'Error',
+  },
 }

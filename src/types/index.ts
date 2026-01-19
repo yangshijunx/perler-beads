@@ -16,10 +16,10 @@ export type BeadSize = 'mini' | 'regular' | 'maxi' | 'mega'
 
 // 豆子尺寸规格 (mm)
 export const BEAD_SIZE_SPECS: Record<BeadSize, number> = {
-  mini: 2.6,      // Mini beads
-  regular: 5,     // Regular/Midi beads (most common)
-  maxi: 10,       // Maxi beads
-  mega: 15        // Mega beads
+  mini: 2.6, // Mini beads
+  regular: 5, // Regular/Midi beads (most common)
+  maxi: 10, // Maxi beads
+  mega: 15, // Mega beads
 }
 
 // 色板配置
@@ -97,6 +97,10 @@ export interface ImageProcessOptions {
   dithering?: boolean
   contrast?: number
   brightness?: number
+  sharpen?: boolean
+  sharpenStrength?: number
+  edgePreserve?: boolean
+  edgeWeight?: number
 }
 
 // Canvas 绘制选项

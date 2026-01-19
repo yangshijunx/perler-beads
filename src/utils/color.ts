@@ -21,7 +21,7 @@ function rgbToLab(rgb: [number, number, number]): [number, number, number] {
 
   // 然后转换为 LAB 颜色空间 (D65 参考白点)
   const xRef = 0.95047
-  const yRef = 1.00000
+  const yRef = 1.0
   const zRef = 1.08883
 
   const xNorm = x / xRef
@@ -42,10 +42,7 @@ function rgbToLab(rgb: [number, number, number]): [number, number, number] {
 /**
  * 计算 Delta-E (CIEDE2000) 颜色差异
  */
-export function deltaE2000(
-  rgb1: [number, number, number],
-  rgb2: [number, number, number]
-): number {
+export function deltaE2000(rgb1: [number, number, number], rgb2: [number, number, number]): number {
   const [L1, a1, b1] = rgbToLab(rgb1)
   const [L2, a2, b2] = rgbToLab(rgb2)
 
@@ -60,10 +57,7 @@ export function deltaE2000(
 /**
  * 计算 Delta-E (CIE76) 颜色差异（更简单快速的版本）
  */
-export function deltaE76(
-  rgb1: [number, number, number],
-  rgb2: [number, number, number]
-): number {
+export function deltaE76(rgb1: [number, number, number], rgb2: [number, number, number]): number {
   const [L1, a1, b1] = rgbToLab(rgb1)
   const [L2, a2, b2] = rgbToLab(rgb2)
 
@@ -79,14 +73,12 @@ export function deltaE76(
  */
 export function rgbDistance(
   rgb1: [number, number, number],
-  rgb2: [number, number, number]
+  rgb2: [number, number, number],
 ): number {
   const [r1, g1, b1] = rgb1
   const [r2, g2, b2] = rgb2
 
-  return Math.sqrt(
-    Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2)
-  )
+  return Math.sqrt(Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2))
 }
 
 /**
@@ -95,7 +87,7 @@ export function rgbDistance(
 export function findClosestColor(
   targetRgb: [number, number, number],
   colorPalette: BeadColor[],
-  useDeltaE: boolean = true
+  useDeltaE: boolean = true,
 ): ColorMatchResult {
   if (colorPalette.length === 0) {
     // Return a default color if palette is empty
@@ -106,9 +98,9 @@ export function findClosestColor(
         code: '00',
         rgb: [128, 128, 128],
         hex: '#808080',
-        brand: 'hama'
+        brand: 'hama',
       },
-      distance: 0
+      distance: 0,
     }
   }
 
@@ -119,9 +111,7 @@ export function findClosestColor(
 
   for (let i = 1; i < colorPalette.length; i++) {
     const color = colorPalette[i]!
-    const distance = useDeltaE
-      ? deltaE76(targetRgb, color.rgb)
-      : rgbDistance(targetRgb, color.rgb)
+    const distance = useDeltaE ? deltaE76(targetRgb, color.rgb) : rgbDistance(targetRgb, color.rgb)
 
     if (distance < minDistance) {
       minDistance = distance
@@ -138,9 +128,9 @@ export function findClosestColor(
 export function matchColors(
   targetColors: [number, number, number][],
   colorPalette: BeadColor[],
-  useDeltaE: boolean = true
+  useDeltaE: boolean = true,
 ): ColorMatchResult[] {
-  return targetColors.map(rgb => findClosestColor(rgb, colorPalette, useDeltaE))
+  return targetColors.map((rgb) => findClosestColor(rgb, colorPalette, useDeltaE))
 }
 
 /**
@@ -151,7 +141,7 @@ export function calculateAverageColor(
   startX: number,
   startY: number,
   width: number,
-  height: number
+  height: number,
 ): [number, number, number] {
   const { data } = imageData
   let totalR = 0
@@ -179,13 +169,13 @@ export function calculateAverageColor(
  */
 export function quantizeColor(
   rgb: [number, number, number],
-  levels: number = 4
+  levels: number = 4,
 ): [number, number, number] {
   const step = 255 / (levels - 1)
   return [
     Math.round(Math.round(rgb[0] / step) * step),
     Math.round(Math.round(rgb[1] / step) * step),
-    Math.round(Math.round(rgb[2] / step) * step)
+    Math.round(Math.round(rgb[2] / step) * step),
   ]
 }
 
@@ -194,10 +184,15 @@ export function quantizeColor(
  */
 export function rgbToHex(rgb: [number, number, number]): string {
   const [r, g, b] = rgb
-  return '#' + [r, g, b].map(x => {
-    const hex = x.toString(16)
-    return hex.length === 1 ? '0' + hex : hex
-  }).join('')
+  return (
+    '#' +
+    [r, g, b]
+      .map((x) => {
+        const hex = x.toString(16)
+        return hex.length === 1 ? '0' + hex : hex
+      })
+      .join('')
+  )
 }
 
 /**
@@ -206,11 +201,7 @@ export function rgbToHex(rgb: [number, number, number]): string {
 export function hexToRgb(hex: string): [number, number, number] {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
   if (result && result[1] && result[2] && result[3]) {
-    return [
-      parseInt(result[1], 16),
-      parseInt(result[2], 16),
-      parseInt(result[3], 16)
-    ]
+    return [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)]
   }
   return [0, 0, 0]
 }
@@ -220,13 +211,13 @@ export function hexToRgb(hex: string): [number, number, number] {
  */
 export function adjustBrightness(
   rgb: [number, number, number],
-  factor: number
+  factor: number,
 ): [number, number, number] {
   const [r, g, b] = rgb
   return [
     Math.min(255, Math.max(0, Math.round(r * factor))),
     Math.min(255, Math.max(0, Math.round(g * factor))),
-    Math.min(255, Math.max(0, Math.round(b * factor)))
+    Math.min(255, Math.max(0, Math.round(b * factor))),
   ]
 }
 
@@ -235,13 +226,13 @@ export function adjustBrightness(
  */
 export function adjustContrast(
   rgb: [number, number, number],
-  factor: number
+  factor: number,
 ): [number, number, number] {
   const intercept = 128 * (1 - factor)
   return [
     Math.min(255, Math.max(0, Math.round(rgb[0] * factor + intercept))),
     Math.min(255, Math.max(0, Math.round(rgb[1] * factor + intercept))),
-    Math.min(255, Math.max(0, Math.round(rgb[2] * factor + intercept)))
+    Math.min(255, Math.max(0, Math.round(rgb[2] * factor + intercept))),
   ]
 }
 
@@ -315,12 +306,132 @@ function rgbToHsl(rgb: [number, number, number]): [number, number, number] {
 }
 
 /**
+ * 锐化图像（增强细节）
+ */
+export function sharpenImage(imageData: ImageData, strength: number = 1.0): ImageData {
+  const { data, width, height } = imageData
+  const copy = new Uint8ClampedArray(data)
+
+  // 锐化卷积核
+  const kernel = [
+    [0, -1, 0],
+    [-1, 5, -1],
+    [0, -1, 0],
+  ]
+
+  const factor = strength
+
+  for (let y = 1; y < height - 1; y++) {
+    for (let x = 1; x < width - 1; x++) {
+      for (let c = 0; c < 3; c++) {
+        let sum = 0
+
+        for (let ky = -1; ky <= 1; ky++) {
+          for (let kx = -1; kx <= 1; kx++) {
+            const idx = ((y + ky) * width + (x + kx)) * 4 + c
+            sum += (data[idx] ?? 0) * kernel[ky + 1]![kx + 1]!
+          }
+        }
+
+        const idx = (y * width + x) * 4 + c
+        const original = data[idx] ?? 0
+        copy[idx] = Math.min(255, Math.max(0, original + (sum - original) * factor))
+      }
+    }
+  }
+
+  return new ImageData(copy, width, height)
+}
+
+/**
+ * 检测边缘强度（使用 Sobel 算子）
+ */
+export function detectEdgeStrength(imageData: ImageData, x: number, y: number): number {
+  const { data, width, height } = imageData
+
+  if (x <= 0 || x >= width - 1 || y <= 0 || y >= height - 1) {
+    return 0
+  }
+
+  // Sobel 算子
+  const sobelX = [
+    [-1, 0, 1],
+    [-2, 0, 2],
+    [-1, 0, 1],
+  ]
+
+  const sobelY = [
+    [-1, -2, -1],
+    [0, 0, 0],
+    [1, 2, 1],
+  ]
+
+  let gx = 0
+  let gy = 0
+
+  for (let dy = -1; dy <= 1; dy++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      const px = x + dx
+      const py = y + dy
+      const idx = (py * width + px) * 4
+
+      // 使用灰度值
+      const gray =
+        (data[idx] ?? 0) * 0.299 + (data[idx + 1] ?? 0) * 0.587 + (data[idx + 2] ?? 0) * 0.114
+
+      gx += gray * sobelX[dy + 1]![dx + 1]!
+      gy += gray * sobelY[dy + 1]![dx + 1]!
+    }
+  }
+
+  return Math.sqrt(gx * gx + gy * gy)
+}
+
+/**
+ * 计算图像区域的加权平均颜色（考虑边缘）
+ */
+export function calculateWeightedAverageColor(
+  imageData: ImageData,
+  startX: number,
+  startY: number,
+  width: number,
+  height: number,
+  edgeWeight: number = 2.0,
+): [number, number, number] {
+  const { data } = imageData
+  let totalR = 0
+  let totalG = 0
+  let totalB = 0
+  let totalWeight = 0
+
+  for (let y = startY; y < startY + height && y < imageData.height; y++) {
+    for (let x = startX; x < startX + width && x < imageData.width; x++) {
+      const index = (y * imageData.width + x) * 4
+
+      // 计算边缘强度
+      const edgeStrength = detectEdgeStrength(imageData, x, y)
+      const weight = 1 + (edgeStrength / 255) * edgeWeight
+
+      totalR += (data[index] ?? 0) * weight
+      totalG += (data[index + 1] ?? 0) * weight
+      totalB += (data[index + 2] ?? 0) * weight
+      totalWeight += weight
+    }
+  }
+
+  return totalWeight > 0
+    ? [
+        Math.round(totalR / totalWeight),
+        Math.round(totalG / totalWeight),
+        Math.round(totalB / totalWeight),
+      ]
+    : [255, 255, 255]
+}
+
+/**
  * 抖动处理 (Floyd-Steinberg)
  */
-export function floydSteinbergDither(
-  imageData: ImageData,
-  colorPalette: BeadColor[]
-): ImageData {
+export function floydSteinbergDither(imageData: ImageData, colorPalette: BeadColor[]): ImageData {
   const { data, width, height } = imageData
   const copy = new Uint8ClampedArray(data)
 
@@ -339,7 +450,7 @@ export function floydSteinbergDither(
       const quantError: [number, number, number] = [
         oldPixel[0] - (newPixel[0] ?? 0),
         oldPixel[1] - (newPixel[1] ?? 0),
-        oldPixel[2] - (newPixel[2] ?? 0)
+        oldPixel[2] - (newPixel[2] ?? 0),
       ]
 
       // 分发误差到相邻像素

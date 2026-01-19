@@ -4,11 +4,17 @@ import type {
   ImageProcessOptions,
   TemplateData,
   BeadColor,
-  CanvasDrawOptions
+  CanvasDrawOptions,
 } from '@/types'
 import { BEAD_SIZE_SPECS } from '@/types'
 import { createOffscreenCanvas, drawBeadCell, drawSquareCell } from '@/utils/canvas'
-import { calculateAverageColor, findClosestColor, floydSteinbergDither } from '@/utils/color'
+import {
+  calculateAverageColor,
+  calculateWeightedAverageColor,
+  findClosestColor,
+  floydSteinbergDither,
+  sharpenImage,
+} from '@/utils/color'
 
 export function useImageProcessor() {
   const isProcessing = ref(false)
@@ -40,17 +46,14 @@ export function useImageProcessor() {
   const imageToCanvas = (
     img: HTMLImageElement,
     maxWidth?: number,
-    maxHeight?: number
+    maxHeight?: number,
   ): HTMLCanvasElement => {
     let width = img.width
     let height = img.height
 
     // 调整尺寸
     if (maxWidth || maxHeight) {
-      const scale = Math.min(
-        maxWidth ? maxWidth / width : 1,
-        maxHeight ? maxHeight / height : 1
-      )
+      const scale = Math.min(maxWidth ? maxWidth / width : 1, maxHeight ? maxHeight / height : 1)
       width = Math.floor(width * scale)
       height = Math.floor(height * scale)
     }
@@ -71,7 +74,7 @@ export function useImageProcessor() {
    */
   const pixelateImage = (
     canvas: HTMLCanvasElement,
-    options: ImageProcessOptions
+    options: ImageProcessOptions,
   ): PixelInfo[][] => {
     isProcessing.value = true
     progress.value = 0
@@ -105,7 +108,7 @@ export function useImageProcessor() {
           code: '00',
           rgb: [128, 128, 128],
           hex: '#808080',
-          brand: options.brand
+          brand: options.brand,
         }
       }
 
@@ -124,7 +127,7 @@ export function useImageProcessor() {
             startX,
             startY,
             cellPixelWidth,
-            cellPixelHeight
+            cellPixelHeight,
           )
 
           // 这里应该匹配到拼豆色系
@@ -134,7 +137,7 @@ export function useImageProcessor() {
             row,
             col,
             color: beadColor,
-            originalColor: avgColor
+            originalColor: avgColor,
           }
           rowPixels.push(pixelInfo)
         }
@@ -157,7 +160,7 @@ export function useImageProcessor() {
   const processImage = async (
     file: File,
     options: ImageProcessOptions,
-    colorPalette: BeadColor[]
+    colorPalette: BeadColor[],
   ): Promise<TemplateData> => {
     isProcessing.value = true
     progress.value = 0
@@ -178,7 +181,13 @@ export function useImageProcessor() {
         throw new Error('Failed to get canvas context')
       }
 
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+      let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+
+      // 应用锐化处理（如果启用）
+      if (options.sharpen) {
+        progress.value = 35
+        imageData = sharpenImage(imageData, options.sharpenStrength || 0.5)
+      }
 
       // 应用抖动处理（如果启用）
       let processedImageData = imageData
@@ -208,14 +217,23 @@ export function useImageProcessor() {
           const startX = col * cellPixelWidth
           const startY = row * cellPixelHeight
 
-          // 计算平均颜色
-          const avgColor = calculateAverageColor(
-            processedImageData,
-            startX,
-            startY,
-            cellPixelWidth,
-            cellPixelHeight
-          )
+          // 计算平均颜色（使用边缘保留或普通平均）
+          const avgColor = options.edgePreserve
+            ? calculateWeightedAverageColor(
+                processedImageData,
+                startX,
+                startY,
+                cellPixelWidth,
+                cellPixelHeight,
+                options.edgeWeight || 2.0,
+              )
+            : calculateAverageColor(
+                processedImageData,
+                startX,
+                startY,
+                cellPixelWidth,
+                cellPixelHeight,
+              )
 
           // 匹配到拼豆色系
           const match = findClosestColor(avgColor, colorPalette, true)
@@ -227,7 +245,7 @@ export function useImageProcessor() {
             row,
             col,
             color: match.color,
-            originalColor: avgColor
+            originalColor: avgColor,
           }
           rowPixels.push(pixelInfo)
         }
@@ -238,10 +256,10 @@ export function useImageProcessor() {
       // 计算总页数（A4纸）
       const a4GridSize = {
         rows: Math.floor((1123 - 40) / beadDiameter),
-        cols: Math.floor((794 - 40) / beadDiameter)
+        cols: Math.floor((794 - 40) / beadDiameter),
       }
-      const totalPages = Math.ceil(gridHeight / a4GridSize.rows) *
-                        Math.ceil(gridWidth / a4GridSize.cols)
+      const totalPages =
+        Math.ceil(gridHeight / a4GridSize.rows) * Math.ceil(gridWidth / a4GridSize.cols)
 
       progress.value = 100
 
@@ -256,7 +274,7 @@ export function useImageProcessor() {
         brand: options.brand,
         pixels,
         colorCounts,
-        totalPages
+        totalPages,
       }
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Image processing failed'
@@ -269,17 +287,11 @@ export function useImageProcessor() {
   /**
    * 渲染模板到 Canvas
    */
-  const renderTemplate = (
-    pixels: PixelInfo[][],
-    options: CanvasDrawOptions
-  ): HTMLCanvasElement => {
+  const renderTemplate = (pixels: PixelInfo[][], options: CanvasDrawOptions): HTMLCanvasElement => {
     const rows = pixels.length
     const cols = pixels[0]?.length || 0
 
-    const canvas = createOffscreenCanvas(
-      cols * options.cellSize,
-      rows * options.cellSize
-    )
+    const canvas = createOffscreenCanvas(cols * options.cellSize, rows * options.cellSize)
     const ctx = canvas.getContext('2d')
 
     if (!ctx) {
@@ -300,14 +312,7 @@ export function useImageProcessor() {
         const y = row * options.cellSize
 
         if (options.showColors) {
-          drawSquareCell(
-            ctx,
-            x,
-            y,
-            options.cellSize,
-            pixel.color.hex,
-            options.showGrid
-          )
+          drawSquareCell(ctx, x, y, options.cellSize, pixel.color.hex, options.showGrid)
         } else {
           // 只显示网格
           ctx.strokeStyle = '#cccccc'
@@ -344,18 +349,12 @@ export function useImageProcessor() {
   /**
    * 生成缩略图
    */
-  const generateThumbnail = (
-    templateData: TemplateData,
-    maxSize: number = 200
-  ): string => {
+  const generateThumbnail = (templateData: TemplateData, maxSize: number = 200): string => {
     const canvas = renderTemplate(templateData.pixels, {
       showGrid: true,
       showNumbers: false,
       showColors: true,
-      cellSize: Math.min(
-        maxSize / templateData.width,
-        maxSize / templateData.height
-      )
+      cellSize: Math.min(maxSize / templateData.width, maxSize / templateData.height),
     })
 
     return canvas.toDataURL('image/png')
@@ -388,6 +387,6 @@ export function useImageProcessor() {
     renderTemplate,
     generateThumbnail,
     clearError,
-    reset
+    reset,
   }
 }

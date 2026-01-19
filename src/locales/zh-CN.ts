@@ -7,7 +7,7 @@ export default {
   nav: {
     home: '首页',
     history: '历史记录',
-    backToEditor: '返回编辑器'
+    backToEditor: '返回编辑器',
   },
 
   // Home page
@@ -16,7 +16,7 @@ export default {
     subtitle: '将图片转换为漂亮的拼豆图案',
     section1: '上传图片',
     section2: '配置设置',
-    section3: '生成模版'
+    section3: '生成模版',
   },
 
   // Image Uploader
@@ -30,7 +30,7 @@ export default {
     zoomOut: '缩小',
     apply: '应用',
     cancel: '取消',
-    clear: '清除'
+    clear: '清除',
   },
 
   // Size Selector
@@ -43,18 +43,18 @@ export default {
       small: '小',
       medium: '中',
       large: '大',
-      xl: '超大'
+      xl: '超大',
     },
     sizes: {
       mini: '迷你',
       regular: '常规',
       maxi: '加大',
-      mega: '特大'
+      mega: '特大',
     },
     estimatedSize: '预估尺寸',
     width: '宽度',
     height: '高度',
-    totalBeads: '总豆子数'
+    totalBeads: '总豆子数',
   },
 
   // Color Palette
@@ -63,7 +63,7 @@ export default {
     colorsAvailable: '{count} 种颜色可用',
     selectedColor: '已选颜色',
     code: '色号',
-    brand: '品牌'
+    brand: '品牌',
   },
 
   // Template Generator
@@ -81,15 +81,33 @@ export default {
     resetZoom: '重置缩放',
     colorLegend: '色号对照表',
     colors: '种颜色',
+    edit: '编辑',
     exportPNG: '导出 PNG',
-    print: '打印'
+    print: '打印',
+  },
+
+  // Editor
+  editor: {
+    title: '编辑图纸',
+    selectColor: '选择颜色',
+    searchColor: '搜索颜色...',
+    tools: {
+      brush: '画笔',
+      fill: '填充',
+      eyedropper: '吸管',
+    },
+    undo: '撤销',
+    redo: '重做',
+    save: '保存',
+    cancel: '取消',
+    close: '关闭',
   },
 
   // Processing
   processing: {
     generate: '生成模版',
     generating: '生成中...',
-    processing: '处理中...'
+    processing: '处理中...',
   },
 
   // Brands
@@ -97,7 +115,7 @@ export default {
     hama: 'Hama',
     perler: 'Perler',
     artkal: 'Artkal',
-    nabbi: 'Nabbi'
+    nabbi: 'Nabbi',
   },
 
   // Bead Sizes
@@ -105,7 +123,7 @@ export default {
     mini: '迷你',
     regular: '常规',
     maxi: '加大',
-    mega: '特大'
+    mega: '特大',
   },
 
   // History
@@ -127,7 +145,7 @@ export default {
     today: '今天',
     yesterday: '昨天',
     daysAgo: '{days} 天前',
-    weeksAgo: '{weeks} 周前'
+    weeksAgo: '{weeks} 周前',
   },
 
   // Settings
@@ -135,7 +153,7 @@ export default {
     advancedOptions: '高级选项',
     enableDithering: '启用抖动处理',
     language: '语言',
-    theme: '主题'
+    theme: '主题',
   },
 
   // Errors
@@ -144,7 +162,7 @@ export default {
     failedToGenerate: '生成模版失败，请重试',
     failedToSave: '保存失败',
     fileNotSupported: '不支持的文件类型',
-    fileTooLarge: '文件过大'
+    fileTooLarge: '文件过大',
   },
 
   // Common
@@ -164,6 +182,6 @@ export default {
     done: '完成',
     loading: '加载中...',
     success: '成功',
-    error: '错误'
-  }
+    error: '错误',
+  },
 }
